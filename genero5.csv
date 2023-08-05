@@ -1,0 +1,6 @@
+id,created_at,updated_at,title,rating,awards,release_date,length,genre_id
+1,NULL,NULL,Avatar,7.9,3,"2010-10-04 00:00:00",120,5
+3,NULL,NULL,"La Guerra de las galaxias: Episodio VI",9.1,7,"2004-07-04 00:00:00",NULL,5
+4,NULL,NULL,"La Guerra de las galaxias: Episodio VII",9.0,6,"2003-11-04 00:00:00",180,5
+5,NULL,NULL,"Parque Jurasico",8.3,5,"1999-01-04 00:00:00",270,5
+7,NULL,NULL,"Transformers: el lado oscuro de la luna",0.9,1,"2005-07-04 00:00:00",NULL,5
