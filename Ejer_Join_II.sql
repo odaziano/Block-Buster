@@ -120,3 +120,67 @@ SELECT ProductoID, ProductoNombre, MAX(preciounitario) AS "Precio Máximo"
 FROM productos
 GROUP BY ProductoID
 ORDER BY "Precio Máximo" DESC;
+
+-- Generar un listado de todas las facturas del empleado 'Buchanan'. 
+SELECT f.facturaid, f.empleadoid, e.apellido, e.nombre
+FROM facturas AS f
+INNER JOIN empleados AS e
+ON f.EmpleadoID = e.EmpleadoID
+WHERE e.Apellido LIKE "Buchanan";
+
+-- Generar un listado con todos los campos de las facturas del correo 'Speedy Express'.
+SELECT *
+FROM facturas AS f
+INNER JOIN correos AS c
+ON f.EnvioVia = c.CorreoID
+WHERE c.compania LIKE "Speedy Express";
+
+-- Generar un listado de todas las facturas con el nombre y apellido de los empleados.
+SELECT f.facturaID, f.empleadoID, e.Apellido, e.Nombre
+FROM facturas AS f
+INNER JOIN Empleados AS e
+ON f.EmpleadoID = e.EmpleadoID
+ORDER BY e.Apellido, e.Nombre;
+
+-- Mostrar un listado de las facturas de todos los clientes “Owner” y país de envío “USA”.
+SELECT f.FacturaID, f.ClienteID, c.compania, f.PaisEnvio
+FROM facturas AS f
+INNER JOIN clientes AS c
+ON f.ClienteID = c.ClienteID
+WHERE f.PaisEnvio LIKE "%USA%";
+
+-- Mostrar todos los campos de las facturas del empleado cuyo apellido sea “Leverling” o que incluyan el producto id = “42”.
+SELECT f.FacturaID, f.EmpleadoID, e.Apellido, e.Nombre, fd.ProductoID, p.ProductoNombre
+FROM facturas AS f
+INNER JOIN empleados AS e
+ON f.EmpleadoID = e.EmpleadoID
+INNER JOIN facturadetalle AS fd
+ON f.facturaID = fd.FacturaID
+INNER JOIN productos AS p
+ON fd.ProductoID = p.ProductoID
+WHERE e.Apellido LIKE "Leverling" OR p.ProductoID = 42;
+
+-- Mostrar todos los campos de las facturas del empleado cuyo apellido sea “Leverling” y que incluya los producto id = “80” o ”42”.
+SELECT f.*, e.Apellido, e.Nombre, fd.ProductoID, p.ProductoNombre
+FROM facturas AS f
+INNER JOIN empleados AS e
+ON f.EmpleadoID = e.EmpleadoID
+INNER JOIN facturadetalle AS fd
+ON f.facturaID = fd.FacturaID
+INNER JOIN productos AS p
+ON fd.ProductoID = p.ProductoID
+WHERE e.Apellido LIKE "Leverling"  AND (p.ProductoID = 80 OR p.ProductoID = 42);
+-- Comprueba (No Hay productoID 80 del vendedor Leverling
+
+-- Generar un listado con los cinco mejores clientes, según sus importes de compras total (PrecioUnitario * Cantidad).
+SELECT f.FacturaID, f.ClienteID, c.Compania, fd.PrecioUnitario, fd.Cantidad, fd.Descuento, (fd.PrecioUnitario*fd.Cantidad)-fd.Descuento AS Total
+FROM facturas AS f
+INNER JOIN clientes AS c
+ON f.ClienteID = c.ClienteID
+INNER JOIN facturadetalle AS fd
+ON f.FacturaID = fd.FacturaID
+ORDER BY Total DESC
+LIMIT 5;
+
+-- Generar un listado de facturas, con los campos id, nombre y apellido del cliente, fecha de factura, país de envío, Total, ordenado de manera descendente por fecha de factura y limitado a 10 filas.
+
