@@ -182,5 +182,14 @@ ON f.FacturaID = fd.FacturaID
 ORDER BY Total DESC
 LIMIT 5;
 
--- Generar un listado de facturas, con los campos id, nombre y apellido del cliente, fecha de factura, país de envío, Total, ordenado de manera descendente por fecha de factura y limitado a 10 filas.
-
+-- Generar un listado de facturas, con los campos id, nombre y apellido del cliente, fecha de factura, país de envío,
+-- Total, ordenado de manera descendente por fecha de factura y limitado a 10 filas.
+SELECT f.FacturaID, f.ClienteID, c.Compania, f.FechaFactura, f.PaisEnvio, SUM((fd.PrecioUnitario*fd.Cantidad)-fd.Descuento) AS Total
+FROM facturas AS f
+INNER JOIN clientes AS c
+ON f.ClienteID = c.ClienteID
+INNER JOIN facturadetalle AS fd
+ON f.FacturaID = fd.FacturaID
+GROUP BY f.FacturaID
+ORDER BY FechaFactura DESC
+LIMIT 10;
