@@ -2,9 +2,9 @@
 -- SELECT, GROUP BY y JOIN
 
 -- 1) Listar las canciones cuya duración sea mayor a 2 minutos.
-SELECT *
+SELECT id, nombre, milisegundos/60000 AS Minutos
 FROM canciones
-WHERE milisegundos > 120000;
+WHERE milisegundos/60000 > 2;
 
 -- 2) Listar las canciones cuyo nombre comience con una vocal. 
 SELECT *
@@ -22,19 +22,23 @@ ORDER BY nombre;
 SELECT id, nombre, compositor
 FROM canciones
 WHERE compositor != ""
-ORDER BY compositor DESC, nombre;
+ORDER BY compositor DESC, nombre ASC;
 
 -- 4) Canciones
 -- 		a) Listar la cantidad de canciones de cada compositor. 
 SELECT compositor, COUNT(*)
 FROM canciones
-GROUP BY compositor;
+WHERE compositor != ""
+GROUP BY compositor
+ORDER BY compositor ASC;
 
 -- 		b) Modificar la consulta para incluir únicamente los compositores que tengan más de 10 canciones. 
 SELECT compositor, COUNT(*)
 FROM canciones
+WHERE compositor != ""
 GROUP BY compositor
-HAVING COUNT(*) >10;
+HAVING COUNT(*) >10
+ORDER BY COUNT(*) DESC;
 
 -- 5) Facturas
 -- 		a) Listar el total facturado agrupado por ciudad.
@@ -44,33 +48,33 @@ GROUP BY ciudad_de_facturacion
 ORDER BY ciudad_de_facturacion ASC;
 
 -- 		b) Modificar el listado del punto (a) mostrando únicamente las ciudades de Canadá.
-SELECT ciudad_de_facturacion, SUM(total)
+SELECT ciudad_de_facturacion, pais_de_facturacion,  SUM(total)
 FROM facturas
 WHERE pais_de_facturacion LIKE "Canada"
-GROUP BY ciudad_de_facturacion;
-
--- 		c) Modificar el listado del punto (a) mostrando únicamente las ciudades con una facturación mayor a 38.
-SELECT ciudad_de_facturacion, SUM(total)
-FROM facturas
-GROUP BY ciudad_de_facturacion
-HAVING SUM(total) >38
+GROUP BY ciudad_de_facturacion, pais_de_facturacion
 ORDER BY ciudad_de_facturacion ASC;
 
--- 		d) Modificar el listado del punto (a) agrupando la facturación por país, y luego por ciudad.
-SELECT pais_de_facturacion,ciudad_de_facturacion
+-- 		c) Modificar el listado del punto (a) mostrando únicamente las ciudades con una facturación mayor a 38.
+SELECT ciudad_de_facturacion, pais_de_facturacion, SUM(total) AS "Factura+38"
 FROM facturas
-GROUP BY pais_de_facturacion,ciudad_de_facturacion
-ORDER BY pais_de_facturacion;
+GROUP BY ciudad_de_facturacion, pais_de_facturacion
+HAVING SUM(total) >38
+ORDER BY pais_de_facturacion, ciudad_de_facturacion ASC;
+
+-- 		d) Modificar el listado del punto (a) agrupando la facturación por país, y luego por ciudad.
+SELECT pais_de_facturacion, ciudad_de_facturacion, SUM(total)
+FROM facturas
+GROUP BY pais_de_facturacion, ciudad_de_facturacion
+ORDER BY pais_de_facturacion, ciudad_de_facturacion ASC;
 
 -- 6) Canciones / Géneros
 -- 		a) Listar la duración mínima, máxima y promedio de las canciones.
-SELECT MIN(c.milisegundos)
-FROM canciones;
-
-SELECT nombre, MAX(c.milisegundos)
-FROM canciones AS c
-INNER JOIN generos AS g
-ON c.id_genero = g.id;
-
+SELECT MIN(c.milisegundos) AS "Mínima", MAX(c.milisegundos) AS "Máxima", AVG(c.milisegundos) AS "Promedio"
+FROM canciones AS c;
  
 -- 		b) Modificar el punto (a) mostrando la información agrupada por género.
+SELECT c.id_genero, g.nombre, MIN(c.milisegundos) AS "Mínima", MAX(c.milisegundos) AS "Máxima", AVG(c.milisegundos) AS "Promedio"
+FROM canciones AS c
+INNER JOIN generos AS g
+ON c.id_genero = g.id
+GROUP BY c.id_genero;
