@@ -40,7 +40,7 @@ SELECT COUNT(payment_id) AS "Cantidad", ROUND(AVG(amount),2) AS "Imp.Promedio", 
 FROM payment;
 
 -- 3) Generar un reporte que responda la pregunta: ¿cuáles son los diez clientes que más dinero gastan y en cuántos alquileres lo hacen?
-SELECT p.customer_id, c.first_name, c.last_name,SUM(p.amount) AS "Monto", COUNT(p.rental_id) AS "Cantidad"
+SELECT p.customer_id, c.first_name, c.last_name, SUM(p.amount) AS Monto, COUNT(p.rental_id) AS Cantidad
 FROM payment AS P
 INNER JOIN customer AS c
 ON p.customer_id = c.customer_id
@@ -48,7 +48,55 @@ GROUP BY p.customer_id
 ORDER BY Monto DESC
 LIMIT 10;
 
--- 4) Generar un reporte que indique: ID de cliente, cantidad de alquileres y monto total para todos los clientes que hayan gastado más de 150 dólares en alquileres.
--- 5) Generar un reporte que muestre por mes de alquiler (rental_date de tabla rental), la cantidad de alquileres y la suma total pagada (amount de tabla payment) para el año de alquiler 2005 (rental_date de tabla rental).
--- 6) Generar un reporte que responda a la pregunta: ¿cuáles son los 5 inventarios más alquilados? (columna inventory_id en la tabla rental). Para cada una de ellas indicar la cantidad de alquileres.
+-- 4) Generar un reporte que indique: ID de cliente, cantidad de alquileres y monto total
+--  para todos los clientes que hayan gastado más de 150 dólares en alquileres.
+SELECT rental.customer_id, CONCAT(customer.first_name,', ' ,customer.last_name) AS Cliente, 
+COUNT(rental.rental_id) AS CaAlq, SUM(payment.amount) AS Gasto_Mas_150
+FROM rental
+INNER JOIN payment
+ON rental.rental_id = payment.rental_id
+INNER JOIN customer
+ON rental.customer_id = customer.customer_id
+GROUP BY rental.customer_id
+HAVING Gasto_Mas_150 >= 150
+ORDER BY Gasto_Mas_150 DESC;
+
+ -- 5) Generar un reporte que muestre por mes de alquiler (rental_date de tabla rental),
+ -- la cantidad de alquileres y la suma total pagada (amount de tabla payment)
+ -- para el año de alquiler 2005 (rental_date de tabla rental).
+SET lc_time_names = 'es_ES';
+SELECT MONTHNAME(rental.rental_date) AS Mes, YEAR(rental.rental_date) AS Anio, 
+FORMAT(COUNT(rental.rental_id),0,'es_ES') AS CaAlq, 
+FORMAT(SUM(payment.amount),2,'es_ES') AS Total
+FROM rental
+INNER JOIN payment
+ON rental.rental_id = payment.rental_id
+WHERE YEAR(rental.rental_date) ='2005'
+GROUP BY Mes, Anio;
+ 
+ -- ComPrueba
+SELECT COUNT(rental_id)
+FROM rental
+WHERE MONTH(rental_date)='06' AND YEAR(rental_date) = '2005';
+
+-- 6) Generar un reporte que responda a la pregunta: 
+-- ¿cuáles son los 5 inventarios más alquilados? (columna inventory_id en la tabla rental).
+-- Para cada una de ellas indicar la cantidad de alquileres.
+SELECT rental.inventory_id, inventory.film_id, film.title, COUNT(rental.rental_id) AS CaAlq
+FROM rental
+INNER JOIN inventory
+ON rental.inventory_id = inventory.inventory_id
+INNER JOIN film
+ON inventory.inventory_id = film.film_id
+GROUP BY rental.inventory_id
+ORDER BY CaAlq DESC
+LIMIT 5;
+
+-- ComPrueba
+SELECT *
+FROM rental
+WHERE inventory_id = 14
+
+
+
 
