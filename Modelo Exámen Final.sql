@@ -101,40 +101,129 @@ WHERE t.nombre = 'Fuego';
 -- 1) Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo.
 -- 		Tablas: pokemon_tipo, tipo
 -- 		Campos: nombre, numero_pokedex
-SELECT t.nombre, (t.id_tipo) AS 'Ca_x_tipo_Poke'
+SELECT t.nombre AS "Nombre Tipo", COUNT(t.id_tipo) AS 'Ca_x_tipo'
 FROM tipo AS t
 INNER JOIN pokemon_tipo AS pt
 ON t.id_tipo = pt.id_tipo
 GROUP BY t.id_tipo;
 
--- 2) Muestra los nombres de los movimientos de tipo "Fuego" junto con la cantidad total de movimientos de tipo "Fuego".
+-- 2) Muestra los nombres de los movimientos de tipo "Fuego" junto con la cantidad total de movimientos 
+-- de tipo "Fuego".
 -- 		Tablas: movimiento, tipo_ataque
 -- 		Campos: nombre, *
-SELECT
+SELECT m.nombre AS Movimiento_Nombre, COUNT(t.nombre) AS Ca_Tipo_Nombre_Fuego
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+WHERE t.nombre = "Fuego"
+GROUP BY Movimiento_Nombre;
 
+-- Otra interpretación, ya que campo tipo_ataque pertenece a otra tabla
+SELECT m.nombre AS Movimiento_Nombre, t.nombre AS Tipo_Nombre, ta.tipo AS Tipo_Ataque
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+INNER JOIN tipo_ataque ta
+ON t.id_tipo_ataque = ta.id_tipo_ataque
+WHERE t.nombre = "Fuego";
 
-Having
-Muestra los nombres de los Pokémon que tienen más de un tipo.
-Tablas: pokemon, pokemon_tipo
-Campos: nombre
-Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo que tienen un peso promedio mayor a 10.
-Tablas: pokemon, pokemon_tipo, tipo
-Campos: nombre, numero_pokedex
+-- Having
+-- 1) Muestra los nombres de los Pokémon que tienen más de un tipo.
+-- 		Tablas: pokemon, pokemon_tipo
+-- 		Campos: nombre
+SELECT p.nombre, COUNT(pt.id_tipo) AS Ca_x_tipo
+FROM pokemon AS p
+INNER JOIN pokemon_tipo AS pt
+ON p.numero_pokedex = pt.numero_pokedex
+GROUP BY p.nombre
+HAVING Ca_x_tipo> 1;
 
+-- 2) Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo que 
+-- tienen un peso promedio mayor a 10.
+-- 		Tablas: pokemon, pokemon_tipo, tipo
+-- 		Campos: nombre, numero_pokedex
+SELECT t.nombre, COUNT(p.numero_pokedex) AS Ca_x_ti_pok, 
+FORMAT(AVG(p.peso),4,'es = ES') AS Prom_Peso
+FROM pokemon AS p
+INNER JOIN pokemon_tipo AS pt
+ON p.numero_pokedex = pt.numero_pokedex
+INNER JOIN tipo AS t
+ON pt.id_tipo = t.id_tipo
+GROUP BY t.nombre
+HAVING Prom_Peso > 10;
 
+-- Funciones de alteración
 
-Funciones de alteración
-Muestra los nombres de los movimientos de tipo de ataque "Especial" con una potencia superior a 10 y una descripción que contenga al menos 20 palabras.
-Tablas: movimiento, tipo_ataque
-Campos: nombre, potencia, tipo, descripcion
-Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo que tienen una velocidad promedio superior a 80. Solo incluye tipos que tienen al menos 3 Pokémon con esas características.
-	Tablas: tipo, pokemon_tipo, estadisticas_base
-Campos: t.nombre, *
+-- 1) Muestra los nombres de los movimientos de tipo de ataque "Especial" con una potencia superior a 10 
+-- y una descripción que contenga al menos 20 palabras.
+-- 		Tablas: movimiento, tipo_ataque
+-- 		Campos: nombre, potencia, tipo, descripcion
+-- 		A* OPCIÓN CAMPO DESCRIPCIÓN CON 20 PALABRAS O MÁS
+SELECT m.nombre, m.potencia, ta.tipo, m.descripcion AS Descrip_Igual_o_Mayor_20_Palabras
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+INNER JOIN tipo_ataque AS ta
+ON t.id_tipo_ataque = ta.id_tipo_ataque
+WHERE ta.tipo ='Especial' AND m.potencia > 10 AND 
+LENGTH(TRIM(m.descripcion)) - LENGTH(REPLACE(m.descripcion, " ", "")) + 1 >=20;
 
-Registros
-Muestra el nombre de cada Pokémon junto con su tipo, velocidad base y puntos de salud (PS) base. Ordena los resultados por la velocidad base de forma descendente.
-	Tablas: pokemon, estadisticas_base, pokemon_tipo, tipo
-Campos: p.nombre, t.nombre, eb.velocidad, eb.ps
-Muestra los nombres de los movimientos de tipo "Agua" junto con los nombres de los Pokémon que pueden aprenderlos y el peso promedio de estos Pokémon.
-	Tablas: movimiento, tipo_ataque, pokemon_tipo, tipo, pokemon
-Campos: m.nombre, p.nombre, peso
+-- Comprueba
+SELECT m.descripcion, length(TRIM(m.descripcion)) - LENGTH(REPLACE(descripcion, " ", "")) + 1 AS Palabras
+FROM movimiento AS m;
+
+-- 		B* OPCIÓN CAMPO DESCRIPCIÓN CON 20 CARATERES O MÁS
+SELECT m.nombre, m.potencia, ta.tipo, m.descripcion AS Descrip_Igual_o_Mayor_20_Carateres
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+INNER JOIN tipo_ataque AS ta
+ON t.id_tipo_ataque = ta.id_tipo_ataque
+WHERE ta.tipo ='Especial' AND m.potencia > 10 AND
+LENGTH(m.descripcion) >=20;
+
+-- 2) Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo
+-- que tienen una velocidad promedio superior a 80.
+-- Solo incluye tipos que tienen al menos 3 Pokémon con esas características.
+-- 		Tablas: tipo, pokemon_tipo, estadisticas_base
+-- 		Campos: t.nombre, *
+SELECT t.nombre, COUNT(*) AS Ca_x_tipo
+FROM tipo AS t
+INNER JOIN pokemon_tipo AS pt
+ON t.id_tipo = pt.id_tipo
+INNER JOIN estadisticas_base AS eb
+ON pt.numero_pokedex = eb.numero_pokedex
+WHERE eb.velocidad > 80
+GROUP BY t.nombre
+HAVING Ca_x_tipo >= 3
+ORDER BY Ca_x_tipo DESC;
+
+-- Registros
+
+-- 1) Muestra el nombre de cada Pokémon junto con su tipo, velocidad base y puntos de salud (PS) base.
+-- Ordena los resultados por la velocidad base de forma descendente.
+-- 		Tablas: pokemon, estadisticas_base, pokemon_tipo, tipo
+-- 		Campos: p.nombre, t.nombre, eb.velocidad, eb.ps
+SELECT p.nombre, t.nombre, eb.velocidad, eb.ps AS Puntos_Salud
+FROM pokemon AS p
+INNER JOIN estadisticas_base AS eb
+ON p.numero_pokedex = eb.numero_pokedex
+INNER JOIN pokemon_tipo AS pt
+ON eb.numero_pokedex = pt.numero_pokedex
+INNER JOIN tipo AS t
+ON t.id_tipo = pt.id_tipo
+ORDER BY eb.velocidad DESC;
+
+-- 2) Muestra los nombres de los movimientos de tipo "Agua"
+-- junto con los nombres de los Pokémon que pueden aprenderlos y el peso promedio de estos Pokémon.
+-- 		Tablas: movimiento, tipo_ataque, pokemon_tipo, tipo, pokemon
+-- 		Campos: m.nombre, p.nombre, peso
+SELECT DISTINCT m.nombre AS Nombre_Movimiento, p.nombre AS Pokemon_Nombre, p.peso, t.nombre AS Nombre_Tipo
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+INNER JOIN pokemon_tipo AS pt
+ON pt.id_tipo = t.id_tipo
+INNER JOIN pokemon AS p
+ON p.numero_pokedex = p.numero_pokedex
+WHERE t.nombre = 'Agua';
