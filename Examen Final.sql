@@ -1,20 +1,18 @@
--- Examen Final - Bases de datos
--- Consultas a la Base de datos Pokemon
+/*Examen Final - Bases de datos
+Consultas a la Base de datos Pokemon
 
--- Introducción 
--- ¡Bienvenido al examen final del curso de Bases de Datos! 
--- En esta ocasión, pondrás a prueba tus habilidades en el uso de MySQL Workbench y tu capacidad para realizar consultas a una base de datos
--- en equipo. Estamos emocionados de que hayas llegado hasta aquí y estés listo para enfrentar este desafío. 
+Introducción 
+¡Bienvenido al examen final del curso de Bases de Datos! 
+En esta ocasión, pondrás a prueba tus habilidades en el uso de MySQL Workbench y tu capacidad para realizar consultas a una base de datos
+en equipo. Estamos emocionados de que hayas llegado hasta aquí y estés listo para enfrentar este desafío. 
+En esta ocasión, nos sumergimos en el emocionante mundo de Pokémon a través de una base de datos que contiene información
+relevante sobre estas criaturas. Utilizaremos MySQL Workbench, una herramienta poderosa que te permitirá gestionar y consultar la base de datos de manera eficiente.
 
--- En esta ocasión, nos sumergimos en el emocionante mundo de Pokémon a través de una base de datos que contiene información
--- relevante sobre estas criaturas. Utilizaremos MySQL Workbench, una herramienta poderosa que te permitirá gestionar y consultar la base de datos de manera eficiente.
-
--- ¿Empezamos?
--- Para iniciar, necesitamos que descargues la base de datos Pokémon click aquí. Esta base se encuentra en un archivo .sql
--- que se debe importar desde MySQL Workbench. Luego, desde la pestaña “File -> Open SQL Script”, buscá y abrí el pokemon.sql que descargaste. Por último, ejecuta el script desde el ícono del rayo.
-
--- Cumplidos todos estos pasos, vamos a ver qué reportes nos solicitan.
--- ¡Buena suerte! 😎✨✨
+¿Empezamos?
+Para iniciar, necesitamos que descargues la base de datos Pokémon click aquí. Esta base se encuentra en un archivo .sql
+que se debe importar desde MySQL Workbench. Luego, desde la pestaña “File -> Open SQL Script”, buscá y abrí el pokemon.sql que descargaste. Por último, ejecuta el script desde el ícono del rayo.
+Cumplidos todos estos pasos, vamos a ver qué reportes nos solicitan.
+¡Buena suerte! 😎✨✨*/
 
 -- Consignas
 -- A continuación encontrarás una serie de ejercicios a resolver:
@@ -23,11 +21,17 @@
 -- 1) Mostrar el nombre, altura y peso de los Pokémon cuya altura sea menor a 0.5.
 -- 		Tablas: pokemon
 -- 		Campos: nombre, peso, altura
+SELECT p.nombre, p.peso, p.altura
+FROM pokemon AS p
+WHERE p.altura < 0.5;
 
-
--- 2) Mostrar los nombres, descripciones, potencia y precisión de los movimientos cuya potencia esté entre 70 y 100, la precisión sea mayor a 80.
+-- 2) Mostrar los nombres, descripciones, potencia y precisión de los movimientos
+-- cuya potencia esté entre 70 y 100, la precisión sea mayor a 80.
 -- 		Tablas: movimiento
 -- 		Campos: nombre, descripcion, potencia, precision_mov
+SELECT m.nombre, m.descripcion, m.potencia, m.precision_mov
+FROM movimiento AS m
+WHERE m.potencia BETWEEN 70 AND 100;
 
 -- Operadores & joins
 -- 1) Mostrar los nombres y potencia de los movimientos que tienen una potencia entre 50 y 80, junto con el nombre del tipo al que pertenecen.
@@ -75,24 +79,65 @@ ORDER BY p.altura ASC;
 -- 1) ¿Cuántos Pokémon tienen un promedio de defensa superior a 100?
 -- 		Tablas: estadisticas_base
 -- 		Campos: defensa
--- 2) ¿Cuál es la potencia promedio de todos los movimientos en la base de datos? ¿Cuáles son los valores máximos y mínimos de la potencia?
+SELECT eb.defensa, COUNT(*) AS Total
+FROM estadisticas_base AS eb
+WHERE eb.defensa > 100
+GROUP BY eb.defensa;
+
+-- 2) ¿Cuál es la potencia promedio de todos los movimientos en la base de datos?
+-- ¿Cuáles son los valores máximos y mínimos de la potencia?
 -- 		Tablas: estadisticas_base
 -- 		Campos: potencia
+SELECT AVG(eb.velocidad) AS 'Promedio' , MAX(eb.velocidad) AS 'Máximo', MIN(eb.velocidad) AS 'Mínimo'
+FROM estadisticas_base AS eb;
 
 -- Group by
--- 1) Muestra los nombres de los tipos de Pokémon junto con la velocidad promedio de los Pokémon de cada tipo.
+-- 1) Muestra los nombres de los tipos de Pokémon
+-- junto con la velocidad promedio de los Pokémon de cada tipo.
 -- 		Tablas: estadisticas_base, pokemon_tipo, tipo
 -- 		Campos: t.nombre, eb.velocidad
--- 2) Muestra los nombres de los tipos de Pokémon junto con la cantidad máxima de movimientos de cualquier tipo que tienen una potencia superior a 80.
+SELECT t.nombre, AVG(eb.velocidad) AS Velocidad_Promedio
+FROM tipo AS t
+INNER JOIN pokemon_tipo AS pt
+ON t.id_tipo = pt.id_tipo
+INNER JOIN estadisticas_base AS eb
+ON pt.numero_pokedex = eb.numero_pokedex
+GROUP BY t.nombre;
+
+-- 2) Muestra los nombres de los tipos de Pokémon junto con la cantidad máxima de movimientos
+-- de cualquier tipo que tienen una potencia superior a 80.
 -- 		Tablas: movimiento, tipo
 -- 		Campos: t.nombre, m.potencia
+SELECT t.nombre, m.potencia
+FROM tipo AS t
+INNER JOIN movimiento AS m
+ON t.id_tipo = m.id_tipo
+WHERE m.potencia > 80
+GROUP BY t.nombre, m.potencia;
+
 -- Having
--- 1) Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo que tienen una precisión promedio mayor a 80 en sus movimientos.
+-- 1) Muestra los nombres de los tipos de Pokémon junto con la cantidad de Pokémon de cada tipo
+-- que tienen una precisión promedio mayor a 80 en sus movimientos.
 -- 		Tablas: tipo, pokemon_tipo, movimiento
 -- 		Campos: t.nombre, m.precision_mov
+SELECT t.nombre, AVG(m.precision_mov) AS Presicion_Promedio
+FROM tipo AS t
+INNER JOIN movimiento AS m
+ON t.id_tipo = m.id_tipo
+GROUP BY t.nombre, m.precision_mov
+HAVING AVG(m.precision_mov) >80;
+
 -- 2) Muestra los nombres de los Pokémon que tienen un promedio de ataque superior a 70 y más de un tipo.
 -- 		Tablas: pokemon, pokemon_tipo, estadisticas_base
 -- 		Campos: p.nombre, eb.ataque, pt.id_tipo
+SELECT p.nombre, AVG(eb.ataque) AS Promedio_Ataque, COUNT(pt.id_tipo) AS Ca_x_Tipo
+FROM pokemon AS p
+INNER JOIN pokemon_tipo AS pt
+ON p.numero_pokedex = pt.numero_pokedex
+INNER JOIN estadisticas_base AS eb
+ON pt.numero_pokedex = eb.numero_pokedex
+GROUP BY p.nombre, eb.ataque
+HAVING AVG(eb.ataque) > 70 AND COUNT(pt.id_tipo) > 1;
 
 -- Registros
 -- 1) Muestra el nombre de cada Pokémon junto con su tipo y velocidad base.
@@ -128,6 +173,21 @@ ON p.numero_pokedex = eb.numero_pokedex
 GROUP BY p.nombre
 HAVING AVG(eb.velocidad) > 60 AND AVG(m.precision_mov) >85;
 
--- 3) Muestra los nombres de los movimientos de tipo "Fuego" junto con los nombres de los Pokémon que pueden aprenderlos y el promedio de su altura. Solo incluye los movimientos con una potencia promedio mayor a 50.
+-- 3) Muestra los nombres de los movimientos de tipo "Fuego"
+-- junto con los nombres de los Pokémon que pueden aprenderlos y el promedio de su altura.
+-- Solo incluye los movimientos con una potencia promedio mayor a 50.
 -- 		Tablas: movimiento, tipo_ataque, pokemon_tipo, tipo, pokemon
 -- 		Campos: m.nombre, p.nombre, p.altura
+SELECT m.nombre AS Nombre_Movimiento, t.nombre AS Tipo, p.nombre AS Nombre_Pokemon, 
+AVG(p.altura) AS Promedio_Altura, m.potencia
+FROM movimiento AS m
+INNER JOIN tipo AS t
+ON m.id_tipo = t.id_tipo
+INNER JOIN pokemon_tipo AS pt
+ON pt.id_tipo = t.id_tipo
+INNER JOIN pokemon AS p
+ON p.numero_pokedex = pt.numero_pokedex
+WHERE t.nombre = 'Fuego'
+GROUP BY m.nombre, p.nombre, m.potencia
+HAVING AVG(m.potencia) > 50;
+
